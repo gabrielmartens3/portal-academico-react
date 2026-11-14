@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Unisinos | Sistema de Atendimento e Matrículas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+const PortalContext = React.createContext();
+function Navbar(props) {
+    return (
+        <header>
+            <div className="top-bar-unisinos py-1">
+                <div className="container d-flex justify-content-between">
+                    <span>Portal Acadêmico • Sistema de Atendimento e Matrículas</span>
+                    <span>Semestre 2026/2</span>
+                </div>
+            </div>
+            <nav className="navbar-unisinos">
+                <div className="container d-flex justify-content-between align-items-center">
+                    {/* Logo Unisinos */}
+                    <div 
+                        className="d-flex align-items-center" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => props.onNavegar(props.usuario ? (props.usuario.tipo === 'aluno' ? 'homeAluno' : 'homeInstitucional') : 'login')}
+                    >
+                        <img 
+                            src="img/logo-unisinos.png" 
+                            alt="Logo Unisinos" 
+                            style={{ height: '38px', width: 'auto' }} 
+                        />
+                    </div>
+
+                    {/* Botões dinâmicos do canto direito */}
+                    <div className="d-flex gap-2">
+                        {props.telaAtual === 'sobre' ? (
+                            <button 
+                                className="btn-unisinos-outline"
+                                onClick={() => props.onNavegar(props.usuario ? (props.usuario.tipo === 'aluno' ? 'homeAluno' : 'homeInstitucional') : 'login')}
+                            >
+                                <i className="bi bi-arrow-left me-1"></i> Voltar
+                            </button>
+                        ) : (
+                            <button 
+                                className="btn-unisinos-outline"
+                                onClick={() => props.onNavegar('sobre')}
+                            >
+                                <i className="bi bi-info-circle me-1"></i> Sobre o projeto
+                            </button>
+                        )}
+
+                        {props.usuario && (
+                            <button className="btn-unisinos" onClick={props.onLogout}>
+                                <i className="bi bi-box-arrow-right me-1"></i> Sair
+                            </button>
+                        )}
+                    </div>
+                </div>
+            </nav>
+        </header>
+    );
+}
+
+// 2. COMPONENTE TELA SOBRE O PROJETO
+function TelaSobre(props) {
+    return (
+        <div className="container my-5">
+            <div className="row justify-content-center">
+                <div className="col-md-8">
+                    <div className="p-5 text-white rounded-3 shadow-sm" style={{ backgroundColor: '#214099' }}>
+                        <h3 className="fw-bold mb-3">
+                            <i className="bi bi-code-slash me-2"></i>Sobre o Projeto
+                        </h3>
+                        <p className="mb-3">
+                            Este sistema front-end simula um <strong>Portal de Atendimento e Matrículas Universitárias</strong>, 
+                            desenvolvido como desafio prático da Atividade Acadêmica de Desenvolvimento Front-end (Unisinos).
+                        </p>
+                        <p className="mb-3">
+                            <strong>Arquitetura e Tecnologias:</strong> React 17 (Componentes Funcionais e de Classe com <code>React.Component</code>), 
+                            gerenciamento de estado (<code>state</code>), Context API, Bootstrap 5 e integração RESTful via HTTP/Promises com Node.js e Express.
+                        </p>
+                        <hr className="border-light opacity-50" />
+                        <div className="d-flex justify-content-between align-items-center small">
+                            <span><strong>Desenvolvedor:</strong> Gabriel Martens da Silva</span>
+                            <button className="btn btn-light btn-sm fw-semibold text-primary" onClick={() => props.onNavegar('login')}>
+                                Ir para o Login
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// 3. COMPONENTE TELA DE LOGIN (Demo)
+class TelaLogin extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            email: 'gabriel.martens@edu.unisinos.br',
+            senha: '••••••••'
+        };
+    }
+
+    render() {
+        return (
+            <div className="container my-5">
+                <div className="row justify-content-center">
+                    <div className="col-md-5">
+                        <div className="card-unisinos p-4">
+                            <div className="text-center mb-4">
+                                <h5 className="fw-bold mb-1">Faça seu login</h5>
+                                <span className="badge bg-light text-secondary border">Modo Demonstração (Acesso Livre)</span>
+                            </div>
+
+                            <div className="mb-3">
+                                <label className="form-label small fw-semibold">E-mail Institucional</label>
+                                <input 
+                                    type="email" 
+                                    className="form-control" 
+                                    value={this.state.email}
+                                    onChange={(e) => this.setState({ email: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="mb-4">
+                                <label className="form-label small fw-semibold">Senha</label>
+                                <input 
+                                    type="password" 
+                                    className="form-control" 
+                                    value={this.state.senha}
+                                    onChange={(e) => this.setState({ senha: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="d-grid gap-2 d-md-flex justify-content-md-between">
+                                <button 
+                                    className="btn-unisinos w-100"
+                                    /* 2. Chame this.props.onLogin passando o perfil 'aluno' */
+                                    onClick={() => this.props.onLogin('aluno')}
+                                >
+                                    <i className="bi bi-person-badge me-1"></i> Login Aluno
+                                </button>
+                                <button 
+                                    className="btn-unisinos w-100"
+                                    /* 3. Chame this.props.onLogin passando o perfil 'institucional' */
+                                    onClick={() => this.props.onLogin('institucional')}
+                                >
+                                    <i className="bi bi-building-gear me-1"></i> Login Institucional
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="mt-3 p-2 bg-white border rounded text-center small text-muted">
+                            Aluno: <strong>Gabriel Martens S.</strong> / Matrícula: <strong>202610849</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+}
+
+    class HomeAluno extends React.Component {
+    render() {
+        return (
+            <PortalContext.Consumer>
+                {(contexto) => {
+                    const { usuario, turmas, disciplinasConcluidas, chamados, navegarPara } = contexto;
+
+                    // Filtra as turmas em que o aluno logado está matriculado
+                    const minhasTurmas = turmas.filter(t => t.alunosMatriculados.includes(usuario.matricula));
+
+                    // Calcula os números dos KPIs
+                    const cargaEmAndamento = minhasTurmas.reduce((acc, t) => acc + t.cargaHoraria, 0);
+                    const cargaConcluida = disciplinasConcluidas.reduce((acc, d) => acc + d.cargaHoraria, 0);
+                    const chamadosPendentes = chamados.filter(c => c.status === 'pendente').length;
+                    const chamadosRespondidos = chamados.filter(c => c.status === 'respondido').length;
+
+                    return (
+                        <div className="container my-4">
+                            {/* Faixa Superior: Crachá do Aluno + Botão Atendimento */}
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                                <div className="px-3 py-2 bg-white border rounded-pill shadow-sm">
+                                    <i className="bi bi-person-circle me-2" style={{ color: '#214099' }}></i>
+                                    <strong>{usuario.nome}</strong>
+                                    <span className="text-muted ms-2">| Matrícula: {usuario.matricula}</span>
+                                </div>
+
+                                <button 
+                                    className="btn-unisinos-outline"
+                                    onClick={() => navegarPara('atendimentoAluno')}
+                                >
+                                    <i className="bi bi-headset me-2"></i>Atendimento Acadêmico
+                                </button>
+                            </div>
+
+                            {/* Grid Principal: Coluna Esquerda (Grade) + Coluna Direita (KPIs) */}
+                            <div className="row g-4">
+                                {/* Coluna Esquerda */}
+                                <div className="col-lg-4">
+                                    <div className="card-unisinos overflow-hidden">
+                                        <div className="card-header-unisinos">
+                                            <i className="bi bi-journal-check me-2"></i>Disciplinas Matriculadas
+                                        </div>
+                                        <ul className="list-group list-group-flush">
+                                            {minhasTurmas.length === 0 ? (
+                                                <li className="list-group-item text-muted small py-3">
+                                                    Nenhuma turma matriculada no momento.
+                                                </li>
+                                            ) : (
+                                                minhasTurmas.map(turma => (
+                                                    <li key={turma.id} className="list-group-item py-3">
+                                                        <div className="fw-semibold">{turma.disciplina}</div>
+                                                        <div className="small text-muted">
+                                                            <i className="bi bi-clock me-1"></i>
+                                                            Cód. {turma.horarioCodigo} ({turma.horarioTexto})
+                                                        </div>
+                                                    </li>
+                                                ))
+                                            )}
+                                        </ul>
+                                    </div>
+
+                                    <button 
+                                        className="btn-unisinos w-100 mt-3 py-2"
+                                        onClick={() => navegarPara('matriculasAluno')}
+                                    >
+                                        <i className="bi bi-plus-circle me-2"></i>Matricular em + Turmas
+                                    </button>
+                                </div>
+
+                                {/* Coluna Direita: 3 Cards de KPIs */}
+                                <div className="col-lg-8">
+                                    <div className="row g-3">
+                                        {/* KPI 1 */}
+                                        <div className="col-md-4">
+                                            <div className="card-unisinos p-3 text-center h-100">
+                                                <h6 className="fw-bold text-secondary mb-3">Disciplinas Matriculadas</h6>
+                                                <div className="p-2 rounded text-white mb-2" style={{ backgroundColor: '#214099' }}>
+                                                    <div className="fs-4 fw-bold">{minhasTurmas.length}</div>
+                                                    <div className="small">Em andamento</div>
+                                                </div>
+                                                <div className="p-2 rounded text-white" style={{ backgroundColor: '#214099', opacity: 0.85 }}>
+                                                    <div className="fs-4 fw-bold">{disciplinasConcluidas.length}</div>
+                                                    <div className="small">Concluídas</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* KPI 2 */}
+                                        <div className="col-md-4">
+                                            <div className="card-unisinos p-3 text-center h-100">
+                                                <h6 className="fw-bold text-secondary mb-3">Carga Horária</h6>
+                                                <div className="p-2 rounded text-white mb-2" style={{ backgroundColor: '#214099' }}>
+                                                    <div className="fs-4 fw-bold">{cargaEmAndamento}h</div>
+                                                    <div className="small">Em andamento</div>
+                                                </div>
+                                                <div className="p-2 rounded text-white" style={{ backgroundColor: '#214099', opacity: 0.85 }}>
+                                                    <div className="fs-4 fw-bold">{cargaConcluida}h</div>
+                                                    <div className="small">Concluídas</div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* KPI 3 */}
+                                        <div className="col-md-4">
+                                            <div className="card-unisinos p-3 text-center h-100">
+                                                <h6 className="fw-bold text-secondary mb-3">Atendimento</h6>
+                                                <div className="p-2 rounded text-white mb-2" style={{ backgroundColor: '#214099' }}>
+                                                    <div className="fs-4 fw-bold">{chamadosPendentes}</div>
+                                                    <div className="small">Aguardando retorno</div>
+                                                </div>
+                                                <div className="p-2 rounded text-white" style={{ backgroundColor: '#214099', opacity: 0.85 }}>
+                                                    <div className="fs-4 fw-bold">{chamadosRespondidos}</div>
+                                                    <div className="small">Respondidos</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }}
+            </PortalContext.Consumer>
+        );
+    }
+}
+
+// 5. COMPONENTE RAIZ (APP COM CONTEXT PROVIDER E DADOS INICIAIS)
+class App extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            telaAtual: 'login',
+            usuario: null,
+            disciplinasConcluidas: [
+                { id: 101, nome: 'Algoritmos e Programação', cargaHoraria: 60 },
+                { id: 102, nome: 'Arquitetura de Computadores', cargaHoraria: 60 },
+                { id: 103, nome: 'Banco de Dados I', cargaHoraria: 60 }
+            ],
+            turmas: [
+                {
+                    id: 1,
+                    disciplina: 'Desenvolvimento Front-End',
+                    area: 'Programação',
+                    professor: 'Prof. Ricardo Alves',
+                    horarioCodigo: '24',
+                    horarioTexto: 'Segunda - Noite',
+                    cargaHoraria: 60,
+                    alunosMatriculados: ['202610849']
+                },
+                {
+                    id: 2,
+                    disciplina: 'Matemática Financeira',
+                    area: 'Gestão e Negócios',
+                    professor: 'Profa. Mariana Costa',
+                    horarioCodigo: '44',
+                    horarioTexto: 'Quarta - Noite',
+                    cargaHoraria: 60,
+                    alunosMatriculados: ['202610849']
+                },
+                {
+                    id: 3,
+                    disciplina: 'Engenharia de Software Ágil',
+                    area: 'Programação',
+                    professor: 'Prof. Ricardo Alves',
+                    horarioCodigo: '34',
+                    horarioTexto: 'Terça - Noite',
+                    cargaHoraria: 60,
+                    alunosMatriculados: []
+                },
+                {
+                    id: 4,
+                    disciplina: 'Governança de TI',
+                    area: 'Gestão e Negócios',
+                    professor: 'Prof. Carlos Mendes',
+                    horarioCodigo: '54',
+                    horarioTexto: 'Quinta - Noite',
+                    cargaHoraria: 60,
+                    alunosMatriculados: []
+                },
+                {
+                    id: 5,
+                    disciplina: 'Estrutura de Dados Avançada',
+                    area: 'Programação',
+                    professor: 'Prof. Lucas Ferreira',
+                    horarioCodigo: '21',
+                    horarioTexto: 'Segunda - Manhã',
+                    cargaHoraria: 60,
+                    alunosMatriculados: []
+                }
+            ],
+            chamados: [
+                {
+                    id: 1,
+                    assunto: 'Dúvida de Matrícula',
+                    destinatario: 'Prof. Ricardo Alves',
+                    mensagem: 'Professor, a disciplina exige conhecimento prévio de Node.js?',
+                    resposta: 'Olá Gabriel! Não precisa, veremos o básico de Node e Express na semana 5.',
+                    status: 'respondido',
+                    data: '12/11/2026'
+                },
+                {
+                    id: 2,
+                    assunto: 'Quebra de Pré-requisito',
+                    destinatario: 'Prof. Lucas Ferreira',
+                    mensagem: 'Gostaria de solicitar quebra de pré-requisito para Estrutura de Dados.',
+                    resposta: '',
+                    status: 'pendente',
+                    data: '14/11/2026'
+                }
+            ]
+        };
+    }
+
+    navegarPara = (novaTela) => {
+        this.setState({ telaAtual: novaTela });
+    }
+
+    fazerLogin = (tipoPerfil) => {
+        if (tipoPerfil === 'aluno') {
+            this.setState({
+                usuario: { tipo: 'aluno', nome: 'Gabriel Martens da Silva', matricula: '202610849' },
+                telaAtual: 'homeAluno'
+            });
+        } else {
+            this.setState({
+                usuario: { tipo: 'institucional', nome: 'Prof. Ricardo Alves', registro: 'DOC-402' },
+                telaAtual: 'homeInstitucional'
+            });
+        }
+    }
+
+    fazerLogout = () => {
+        this.setState({ usuario: null, telaAtual: 'login' });
+    }
+
+    render() {
+        const { telaAtual, usuario } = this.state;
+
+        const valorContexto = {
+            ...this.state,
+            navegarPara: this.navegarPara
+        };
+
+        return (
+            <PortalContext.Provider value={valorContexto}>
+                <div>
+                    <Navbar 
+                        telaAtual={telaAtual} 
+                        usuario={usuario} 
+                        onNavegar={this.navegarPara} 
+                        onLogout={this.fazerLogout} 
+                    />
+
+                    {telaAtual === 'login' && <TelaLogin onLogin={this.fazerLogin} />}
+                    {telaAtual === 'sobre' && <TelaSobre onNavegar={this.navegarPara} />}
+                    {telaAtual === 'homeAluno' && <HomeAluno />}
+
+                    {telaAtual === 'matriculasAluno' && (
+                        <div className="container my-4">
+                            <button className="btn-unisinos-outline mb-3" onClick={() => this.navegarPara('homeAluno')}>← Voltar</button>
+                            <h4>Tela de Matrículas (Próximo passo!)</h4>
+                        </div>
+                    )}
+                    {telaAtual === 'atendimentoAluno' && (
+                        <div className="container my-4">
+                            <button className="btn-unisinos-outline mb-3" onClick={() => this.navegarPara('homeAluno')}>← Voltar</button>
+                            <h4>Tela de Atendimento (Em seguida!)</h4>
+                        </div>
+                    )}
+                    {telaAtual === 'homeInstitucional' && (
+                        <div className="container my-4"><h4>Painel Institucional, {usuario.nome}!</h4></div>
+                    )}
+                </div>
+            </PortalContext.Provider>
+        );
+    }
+}
+
+ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+
+</body>
+</html>
