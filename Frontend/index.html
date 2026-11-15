@@ -43,7 +43,7 @@ function Navbar(props) {
                         />
                     </div>
 
-                    {/* Botões dinâmicos do canto direito */}
+                    {/* Botões do canto direito */}
                     <div className="d-flex gap-2">
                         {props.telaAtual === 'sobre' ? (
                             <button 
@@ -73,7 +73,7 @@ function Navbar(props) {
     );
 }
 
-// 2. COMPONENTE TELA SOBRE O PROJETO
+//COMPONENTE TELA SOBRE O PROJETO
 function TelaSobre(props) {
     return (
         <div className="container my-5">
@@ -105,7 +105,7 @@ function TelaSobre(props) {
     );
 }
 
-// 3. COMPONENTE TELA DE LOGIN (Demo)
+//COMPONENTE TELA DE LOGIN (Demo)
 class TelaLogin extends React.Component {
     constructor(props) {
         super(props);
@@ -149,14 +149,12 @@ class TelaLogin extends React.Component {
                             <div className="d-grid gap-2 d-md-flex justify-content-md-between">
                                 <button 
                                     className="btn-unisinos w-100"
-                                    /* 2. Chame this.props.onLogin passando o perfil 'aluno' */
                                     onClick={() => this.props.onLogin('aluno')}
                                 >
                                     <i className="bi bi-person-badge me-1"></i> Login Aluno
                                 </button>
                                 <button 
                                     className="btn-unisinos w-100"
-                                    /* 3. Chame this.props.onLogin passando o perfil 'institucional' */
                                     onClick={() => this.props.onLogin('institucional')}
                                 >
                                     <i className="bi bi-building-gear me-1"></i> Login Institucional
@@ -192,7 +190,6 @@ class TelaLogin extends React.Component {
 
                     return (
                         <div className="container my-4">
-                            {/* Faixa Superior: Crachá do Aluno + Botão Atendimento */}
                             <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
                                 <div className="px-3 py-2 bg-white border rounded-pill shadow-sm">
                                     <i className="bi bi-person-circle me-2" style={{ color: '#214099' }}></i>
@@ -208,9 +205,7 @@ class TelaLogin extends React.Component {
                                 </button>
                             </div>
 
-                            {/* Grid Principal: Coluna Esquerda (Grade) + Coluna Direita (KPIs) */}
                             <div className="row g-4">
-                                {/* Coluna Esquerda */}
                                 <div className="col-lg-4">
                                     <div className="card-unisinos overflow-hidden">
                                         <div className="card-header-unisinos">
@@ -243,7 +238,6 @@ class TelaLogin extends React.Component {
                                     </button>
                                 </div>
 
-                                {/* Coluna Direita: 3 Cards de KPIs */}
                                 <div className="col-lg-8">
                                     <div className="row g-3">
                                         {/* KPI 1 */}
@@ -301,7 +295,703 @@ class TelaLogin extends React.Component {
     }
 }
 
-// 5. COMPONENTE RAIZ (APP COM CONTEXT PROVIDER E DADOS INICIAIS)
+
+//COMPONENTE TELA DE MATRÍCULAS DO ALUNO
+class TelaMatriculas extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            filtroArea: 'Todas',
+            avisoChoque: ''
+        };
+    }
+
+    handleMatricular = (turma, minhasTurmas, alternarMatricula) => {
+        const jaMatriculado = turma.alunosMatriculados.includes(this.props.matriculaAluno);
+
+        if (!jaMatriculado) {
+            const choque = minhasTurmas.find(t => t.horarioCodigo === turma.horarioCodigo);
+            if (choque) {
+                this.setState({
+                    avisoChoque: `Choque de horário! Você já está matriculado em "${choque.disciplina}" no horário ${turma.horarioCodigo} (${turma.horarioTexto}).`
+                });
+                return;
+            }
+        }
+
+        this.setState({ avisoChoque: '' });
+        alternarMatricula(turma.id);
+    }
+
+    render() {
+        return (
+            <PortalContext.Consumer>
+                {(contexto) => {
+                    const { usuario, turmas, navegarPara, alternarMatricula } = contexto;
+                    const { filtroArea, avisoChoque } = this.state;
+
+                    const minhasTurmas = turmas.filter(t => t.alunosMatriculados.includes(usuario.matricula));
+                    const turmasFiltradas = filtroArea === 'Todas'
+                        ? turmas
+                        : turmas.filter(t => t.area === filtroArea);
+
+                    return (
+                        <div className="container my-4">
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                                <button className="btn-unisinos-outline" onClick={() => navegarPara('homeAluno')}>
+                                    <i className="bi bi-arrow-left me-1"></i> Voltar para Home
+                                </button>
+
+                                <div className="px-4 py-2 bg-white border rounded shadow-sm fw-bold fs-5" style={{ color: '#214099' }}>
+                                    Matricule-se
+                                </div>
+
+                                <div className="d-flex align-items-center gap-2 bg-white px-3 py-2 border rounded">
+                                    <i className="bi bi-funnel-fill" style={{ color: '#214099' }}></i>
+                                    <span className="small fw-semibold">Área:</span>
+                                    <select
+                                        className="form-select form-select-sm border-0 fw-semibold"
+                                        style={{ width: 'auto', color: '#214099' }}
+                                        value={filtroArea}
+                                        onChange={(e) => this.setState({ filtroArea: e.target.value })}
+                                    >
+                                        <option value="Todas">Todas as áreas</option>
+                                        <option value="Programação">Programação</option>
+                                        <option value="Gestão e Negócios">Gestão e Negócios</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {avisoChoque && (
+                                <div className="alert alert-warning alert-dismissible fade show" role="alert">
+                                    <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                                    {avisoChoque}
+                                    <button type="button" className="btn-close" onClick={() => this.setState({ avisoChoque: '' })}></button>
+                                </div>
+                            )}
+
+                            <div className="row g-4" style={{ maxHeight: '65vh', overflowY: 'auto' }}>
+                                {turmasFiltradas.map(turma => {
+                                    const matriculado = turma.alunosMatriculados.includes(usuario.matricula);
+
+                                    return (
+                                        <div key={turma.id} className="col-md-6 col-lg-3">
+                                            <div className="card-unisinos h-100 d-flex flex-column justify-content-between overflow-hidden">
+                                                <div className="p-3">
+                                                    <span className="badge bg-light text-primary border mb-2">{turma.area}</span>
+                                                    <h6 className="fw-bold mb-2">{turma.disciplina}</h6>
+                                                    <div className="small text-muted mb-1">
+                                                        <i className="bi bi-person-video3 me-1"></i> {turma.professor}
+                                                    </div>
+                                                    <div className="small text-muted mb-1">
+                                                        <i className="bi bi-clock-history me-1"></i> Cód. <strong>{turma.horarioCodigo}</strong> • {turma.horarioTexto}
+                                                    </div>
+                                                    <div className="small text-muted">
+                                                        <i className="bi bi-people me-1"></i> {turma.alunosMatriculados.length} aluno(s) inscrito(s)
+                                                    </div>
+                                                </div>
+
+                                                <button
+                                                    className="w-100 py-2 border-0 fw-semibold text-white"
+                                                    style={{ backgroundColor: matriculado ? '#16a34a' : '#214099' }}
+                                                    onClick={() => this.handleMatricular(turma, minhasTurmas, alternarMatricula)}
+                                                >
+                                                    {matriculado ? (
+                                                        <span><i className="bi bi-check-circle-fill me-1"></i> Matriculado (Cancelar)</span>
+                                                    ) : (
+                                                        <span><i className="bi bi-plus-circle me-1"></i> Matricular-se</span>
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    );
+                }}
+            </PortalContext.Consumer>
+        );
+    }
+}
+
+//COMPONENTE TELA DE ATENDIMENTO DO ALUNO
+class TelaAtendimentoAluno extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            mostrarForm: true,
+            assunto: 'Dúvida de Matrícula',
+            destinatario: 'Prof. Ricardo Alves',
+            mensagem: '',
+            sucesso: false
+        };
+    }
+
+    handleEnviar = (e, adicionarChamado) => {
+        e.preventDefault();
+        if (!this.state.mensagem.trim()) return;
+
+        adicionarChamado({
+            assunto: this.state.assunto,
+            destinatario: this.state.destinatario,
+            mensagem: this.state.mensagem
+        });
+
+        this.setState({ mensagem: '', sucesso: true });
+        setTimeout(() => this.setState({ sucesso: false }), 3000);
+    }
+
+    render() {
+        return (
+            <PortalContext.Consumer>
+                {(contexto) => {
+                    const { chamados, navegarPara, adicionarChamado } = contexto;
+
+                    return (
+                        <div className="container my-4">
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                                <button className="btn-unisinos-outline" onClick={() => navegarPara('homeAluno')}>
+                                    <i className="bi bi-arrow-left me-1"></i> Voltar para Home
+                                </button>
+
+                                <div className="px-4 py-2 bg-white border rounded shadow-sm fw-bold fs-5" style={{ color: '#214099' }}>
+                                    Atendimento / Chamados
+                                </div>
+
+                                <div style={{ width: '140px' }}></div>
+                            </div>
+
+                            <div className="row g-4">
+                                <div className="col-lg-7">
+                                    <button
+                                        className="btn-unisinos mb-3"
+                                        onClick={() => this.setState({ mostrarForm: !this.state.mostrarForm })}
+                                    >
+                                        <i className="bi bi-plus-lg me-1"></i> Novo Chamado
+                                    </button>
+
+                                    {this.state.sucesso && (
+                                        <div className="alert alert-success py-2 small">
+                                            <i className="bi bi-check-circle-fill me-1"></i> Protocolo enviado com sucesso!
+                                        </div>
+                                    )}
+
+                                    {this.state.mostrarForm && (
+                                        <form className="card-unisinos p-4" onSubmit={(e) => this.handleEnviar(e, adicionarChamado)}>
+                                            <div className="row g-3 mb-3">
+                                                <div className="col-md-6">
+                                                    <label className="form-label small fw-semibold">Assunto da Solicitação</label>
+                                                    <select
+                                                        className="form-select"
+                                                        value={this.state.assunto}
+                                                        onChange={(e) => this.setState({ assunto: e.target.value })}
+                                                    >
+                                                        <option value="Dúvida de Matrícula">Dúvida de Matrícula</option>
+                                                        <option value="Ajuste de Grade">Ajuste de Grade</option>
+                                                        <option value="Quebra de Pré-requisito">Quebra de Pré-requisito</option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="col-md-6">
+                                                    <label className="form-label small fw-semibold">Destinatário (Docente / Coordenação)</label>
+                                                    <select
+                                                        className="form-select"
+                                                        value={this.state.destinatario}
+                                                        onChange={(e) => this.setState({ destinatario: e.target.value })}
+                                                    >
+                                                        <option value="Prof. Ricardo Alves">Prof. Ricardo Alves</option>
+                                                        <option value="Profa. Mariana Costa">Profa. Mariana Costa</option>
+                                                        <option value="Prof. Carlos Mendes">Prof. Carlos Mendes</option>
+                                                        <option value="Prof. Lucas Ferreira">Prof. Lucas Ferreira</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="mb-3">
+                                                <label className="form-label small fw-semibold">Descrição do Chamado</label>
+                                                <textarea
+                                                    className="form-control"
+                                                    rows="5"
+                                                    placeholder="Descreva sua dúvida ou solicitação acadêmica..."
+                                                    value={this.state.mensagem}
+                                                    onChange={(e) => this.setState({ mensagem: e.target.value })}
+                                                    required
+                                                ></textarea>
+                                            </div>
+
+                                            <div className="text-end">
+                                                <button type="submit" className="btn-unisinos">
+                                                    <i className="bi bi-send me-1"></i> Enviar Chamado
+                                                </button>
+                                            </div>
+                                        </form>
+                                    )}
+                                </div>
+
+                                <div className="col-lg-5">
+                                    <div className="card-unisinos overflow-hidden">
+                                        <div className="card-header-unisinos">
+                                            <i className="bi bi-list-ul me-2"></i>Meus Protocolos
+                                        </div>
+                                        <div className="list-group list-group-flush" style={{ maxHeight: '55vh', overflowY: 'auto' }}>
+                                            {chamados.map(chamado => (
+                                                <div key={chamado.id} className="list-group-item py-3">
+                                                    <div className="d-flex justify-content-between align-items-center mb-1">
+                                                        <span className="fw-bold small">{chamado.assunto}</span>
+                                                        <span className="small d-flex align-items-center gap-1">
+                                                            <span className={`status-dot ${chamado.status === 'respondido' ? 'status-respondido' : 'status-pendente'}`}></span>
+                                                            {chamado.status === 'respondido' ? 'Respondido' : 'Pendente'}
+                                                        </span>
+                                                    </div>
+                                                    <div className="small text-muted mb-1">
+                                                        Para: <strong>{chamado.destinatario}</strong> • {chamado.data}
+                                                    </div>
+                                                    <p className="small mb-2">{chamado.mensagem}</p>
+
+                                                    {chamado.resposta && (
+                                                        <div className="p-2 rounded bg-light border-start border-3 border-success small">
+                                                            <strong>Retorno:</strong> {chamado.resposta}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }}
+            </PortalContext.Consumer>
+        );
+    }
+}
+
+//COMPONENTE HOME INSTITUCIONAL PROFESSOR
+class HomeInstitucional extends React.Component {
+    render() {
+        return (
+            <PortalContext.Consumer>
+                {(contexto) => {
+                    const { usuario, turmas, chamados, navegarPara } = contexto;
+
+                    const minhasTurmasProf = turmas.filter(t => t.professor === usuario.nome);
+                    const totalAlunosInscritos = turmas.reduce((acc, t) => acc + t.alunosMatriculados.length, 0);
+                    const chamadosPendentes = chamados.filter(c => c.status === 'pendente').length;
+
+                    return (
+                        <div className="container my-4">
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                                <div className="px-3 py-2 bg-white border rounded-pill shadow-sm">
+                                    <i className="bi bi-building-gear me-2" style={{ color: '#214099' }}></i>
+                                    <strong>{usuario.nome}</strong>
+                                    <span className="text-muted ms-2">| Registro: {usuario.registro}</span>
+                                </div>
+
+                                <div className="d-flex gap-2">
+                                    <button
+                                        className="btn-unisinos-outline"
+                                        onClick={() => navegarPara('ofertasInstitucional')}
+                                    >
+                                        <i className="bi bi-plus-square me-2"></i>Gestão de Ofertas
+                                    </button>
+                                    <button
+                                        className="btn-unisinos"
+                                        onClick={() => navegarPara('chamadosInstitucional')}
+                                    >
+                                        <i className="bi bi-chat-left-text me-2"></i>Central de Chamados
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="row g-4">
+                                {/* Coluna Esquerda: Turmas Professor */}
+                                <div className="col-lg-4">
+                                    <div className="card-unisinos overflow-hidden">
+                                        <div className="card-header-unisinos">
+                                            <i className="bi bi-easel2 me-2"></i>Minhas Turmas Ativas
+                                        </div>
+                                        <ul className="list-group list-group-flush">
+                                            {minhasTurmasProf.length === 0 ? (
+                                                <li className="list-group-item text-muted small py-3">
+                                                    Nenhuma turma vinculada no momento.
+                                                </li>
+                                            ) : (
+                                                minhasTurmasProf.map(turma => (
+                                                    <li key={turma.id} className="list-group-item py-3">
+                                                        <div className="fw-semibold">{turma.disciplina}</div>
+                                                        <div className="small text-muted">
+                                                            <i className="bi bi-clock me-1"></i>
+                                                            Cód. {turma.horarioCodigo} ({turma.horarioTexto})
+                                                        </div>
+                                                        <div className="small text-primary mt-1">
+                                                            <i className="bi bi-people-fill me-1"></i>
+                                                            {turma.alunosMatriculados.length} aluno(s) matriculado(s)
+                                                        </div>
+                                                    </li>
+                                                ))
+                                            )}
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                {/* Coluna Direita: 3 Cards de KPIs */}
+                                <div className="col-lg-8">
+                                    <div className="row g-3">
+                                        <div className="col-md-4">
+                                            <div
+                                                className="card-unisinos p-4 text-center h-100"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => navegarPara('ofertasInstitucional')}
+                                            >
+                                                <h6 className="fw-bold text-secondary mb-3">Turmas Ofertadas</h6>
+                                                <div className="p-3 rounded text-white" style={{ backgroundColor: '#214099' }}>
+                                                    <div className="fs-2 fw-bold">{turmas.length}</div>
+                                                    <div className="small">No semestre</div>
+                                                </div>
+                                                <div className="small text-primary mt-3 fw-semibold">
+                                                    Gerenciar ofertas →
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-4">
+                                            <div className="card-unisinos p-4 text-center h-100">
+                                                <h6 className="fw-bold text-secondary mb-3">Alunos Matriculados</h6>
+                                                <div className="p-3 rounded text-white" style={{ backgroundColor: '#214099' }}>
+                                                    <div className="fs-2 fw-bold">{totalAlunosInscritos}</div>
+                                                    <div className="small">Inscrições ativas</div>
+                                                </div>
+                                                <div className="small text-muted mt-3">
+                                                    Todas as turmas
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-md-4">
+                                            <div
+                                                className="card-unisinos p-4 text-center h-100"
+                                                style={{ cursor: 'pointer' }}
+                                                onClick={() => navegarPara('chamadosInstitucional')}
+                                            >
+                                                <h6 className="fw-bold text-secondary mb-3">Chamados Pendentes</h6>
+                                                <div
+                                                    className="p-3 rounded text-white"
+                                                    style={{ backgroundColor: chamadosPendentes > 0 ? '#e85a3c' : '#16a34a' }}
+                                                >
+                                                    <div className="fs-2 fw-bold">{chamadosPendentes}</div>
+                                                    <div className="small">Aguardando parecer</div>
+                                                </div>
+                                                <div className="small text-primary mt-3 fw-semibold">
+                                                    Acessar chamados →
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }}
+            </PortalContext.Consumer>
+        );
+    }
+}
+
+// GESTÃO DE OFERTAS DE TURMAS (INSTITUCIONAL)
+class TelaOfertasTurmas extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            disciplina: '',
+            area: 'Programação',
+            horarioCodigo: '64',
+            aviso: ''
+        };
+    }
+
+    mapaHorarios = {
+        '21': 'Segunda - Manhã',
+        '24': 'Segunda - Noite',
+        '34': 'Terça - Noite',
+        '44': 'Quarta - Noite',
+        '54': 'Quinta - Noite',
+        '64': 'Sexta - Noite'
+    };
+
+    handleCriarOferta = (e, usuario, adicionarTurma) => {
+        e.preventDefault();
+        if (!this.state.disciplina.trim()) return;
+
+        adicionarTurma({
+            disciplina: this.state.disciplina,
+            area: this.state.area,
+            professor: usuario.nome,
+            horarioCodigo: this.state.horarioCodigo,
+            horarioTexto: this.mapaHorarios[this.state.horarioCodigo]
+        });
+
+        this.setState({
+            disciplina: '',
+            aviso: 'Nova oferta de turma publicada com sucesso!'
+        });
+        setTimeout(() => this.setState({ aviso: '' }), 3000);
+    }
+
+    render() {
+        return (
+            <PortalContext.Consumer>
+                {(contexto) => {
+                    const { usuario, turmas, navegarPara, adicionarTurma, removerTurma } = contexto;
+
+                    return (
+                        <div className="container my-4">
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                                <button className="btn-unisinos-outline" onClick={() => navegarPara('homeInstitucional')}>
+                                    <i className="bi bi-arrow-left me-1"></i> Voltar para Home
+                                </button>
+
+                                <div className="px-4 py-2 bg-white border rounded shadow-sm fw-bold fs-5" style={{ color: '#214099' }}>
+                                    Gestão de Ofertas de Turmas
+                                </div>
+
+                                <div style={{ width: '140px' }}></div>
+                            </div>
+
+                            {/* Formulário para nova turma */}
+                            <form className="card-unisinos p-4 mb-4" onSubmit={(e) => this.handleCriarOferta(e, usuario, adicionarTurma)}>
+                                <h6 className="fw-bold mb-3" style={{ color: '#214099' }}>
+                                    <i className="bi bi-plus-circle me-2"></i>Ofertar Nova Turma (Padrão Unisinos)
+                                </h6>
+
+                                {this.state.aviso && (
+                                    <div className="alert alert-success py-2 small">{this.state.aviso}</div>
+                                )}
+
+                                <div className="row g-3 align-items-end">
+                                    <div className="col-md-4">
+                                        <label className="form-label small fw-semibold">Nome da Disciplina</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Ex: Desenvolvimento Mobile"
+                                            value={this.state.disciplina}
+                                            onChange={(e) => this.setState({ disciplina: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div className="col-md-3">
+                                        <label className="form-label small fw-semibold">Área Temática</label>
+                                        <select
+                                            className="form-select"
+                                            value={this.state.area}
+                                            onChange={(e) => this.setState({ area: e.target.value })}
+                                        >
+                                            <option value="Programação">Programação</option>
+                                            <option value="Gestão e Negócios">Gestão e Negócios</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="col-md-3">
+                                        <label className="form-label small fw-semibold">Turno / Horário Unisinos</label>
+                                        <select
+                                            className="form-select"
+                                            value={this.state.horarioCodigo}
+                                            onChange={(e) => this.setState({ horarioCodigo: e.target.value })}
+                                        >
+                                            <option value="21">21 - Segunda Manhã</option>
+                                            <option value="24">24 - Segunda Noite</option>
+                                            <option value="34">34 - Terça Noite</option>
+                                            <option value="44">44 - Quarta Noite</option>
+                                            <option value="54">54 - Quinta Noite</option>
+                                            <option value="64">64 - Sexta Noite</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="col-md-2">
+                                        <button type="submit" className="btn-unisinos w-100">
+                                            Ofertar Turma
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {/* Grid de Turmas Ofertada s */}
+                            <div className="row g-4">
+                                {turmas.map(turma => (
+                                    <div key={turma.id} className="col-md-6 col-lg-3">
+                                        <div className="card-unisinos h-100 d-flex flex-column justify-content-between overflow-hidden">
+                                            <div className="p-3">
+                                                <span className="badge bg-light text-primary border mb-2">{turma.area}</span>
+                                                <h6 className="fw-bold mb-2">{turma.disciplina}</h6>
+                                                <div className="small text-muted mb-1">
+                                                    <i className="bi bi-person-video3 me-1"></i> {turma.professor}
+                                                </div>
+                                                <div className="small text-muted mb-1">
+                                                    <i className="bi bi-clock-history me-1"></i> Cód. <strong>{turma.horarioCodigo}</strong> • {turma.horarioTexto}
+                                                </div>
+                                                <div className="small fw-semibold text-dark mt-2">
+                                                    <i className="bi bi-people-fill me-1 text-primary"></i>
+                                                    Alunos matriculados: {turma.alunosMatriculados.length > 0 ? turma.alunosMatriculados.join(', ') : 'Nenhum'}
+                                                </div>
+                                            </div>
+
+                                            <button
+                                                className="w-100 py-2 border-0 fw-semibold text-white"
+                                                style={{ backgroundColor: '#214099' }}
+                                                onClick={() => removerTurma(turma.id)}
+                                            >
+                                                <i className="bi bi-trash me-1"></i> Encerrar Oferta
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }}
+            </PortalContext.Consumer>
+        );
+    }
+}
+
+// 6.3 COMPONENTE DE CHAMADOS (INSTITCIONAL)
+class TelaChamadosProf extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            filtroStatus: 'todos',
+            respostasDigitadas: {}
+        };
+    }
+
+    handleResponder = (chamadoId, responderChamado) => {
+        const texto = this.state.respostasDigitadas[chamadoId];
+        if (!texto || !texto.trim()) return;
+
+        responderChamado(chamadoId, texto);
+        this.setState({
+            respostasDigitadas: { ...this.state.respostasDigitadas, [chamadoId]: '' }
+        });
+    }
+
+    render() {
+        return (
+            <PortalContext.Consumer>
+                {(contexto) => {
+                    const { chamados, navegarPara, responderChamado } = contexto;
+                    const { filtroStatus, respostasDigitadas } = this.state;
+
+                    const totalPendentes = chamados.filter(c => c.status === 'pendente').length;
+
+                    const chamadosFiltrados = chamados.filter(c => {
+                        if (filtroStatus === 'todos') return true;
+                        return c.status === filtroStatus;
+                    });
+
+                    return (
+                        <div className="container my-4">
+                            {/* Topo */}
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+                                <button className="btn-unisinos-outline" onClick={() => navegarPara('homeInstitucional')}>
+                                    <i className="bi bi-arrow-left me-1"></i> Voltar para Home
+                                </button>
+
+                                <div className="px-4 py-2 bg-white border rounded shadow-sm fw-bold fs-5" style={{ color: '#214099' }}>
+                                    Chamados Acadêmicos
+                                </div>
+
+                                <div style={{ width: '140px' }}></div>
+                            </div>
+
+                            {/* Barra com Card Pendentes à esquerda + Filtros à direita */}
+                            <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                                <div className="card-unisinos overflow-hidden text-center" style={{ minWidth: '140px' }}>
+                                    <div className="px-3 py-1 small fw-bold text-secondary bg-light">Pendentes</div>
+                                    <div className="py-2 text-white fw-bold fs-5" style={{ backgroundColor: '#214099' }}>
+                                        {totalPendentes}
+                                    </div>
+                                </div>
+
+                                <div className="d-flex align-items-center gap-2 bg-white px-3 py-2 border rounded">
+                                    <i className="bi bi-funnel-fill" style={{ color: '#214099' }}></i>
+                                    <span className="small fw-semibold">Filtros:</span>
+                                    <select
+                                        className="form-select form-select-sm border-0 fw-semibold"
+                                        style={{ width: 'auto', color: '#214099' }}
+                                        value={filtroStatus}
+                                        onChange={(e) => this.setState({ filtroStatus: e.target.value })}
+                                    >
+                                        <option value="todos">Todos os chamados</option>
+                                        <option value="pendente">Não respondidos (Pendentes)</option>
+                                        <option value="respondido">Respondidos</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* grid de cards dos chamados */}
+                            <div className="row g-4">
+                                {chamadosFiltrados.map(chamado => (
+                                    <div key={chamado.id} className="col-md-6 col-lg-4">
+                                        <div className="card-unisinos p-3 h-100 d-flex flex-column justify-content-between">
+                                            <div>
+                                                <div className="d-flex justify-content-between align-items-center mb-2">
+                                                    <span className="badge bg-light text-primary border">{chamado.assunto}</span>
+                                                    <span className="small fw-semibold d-flex align-items-center gap-1">
+                                                        <span className={`status-dot ${chamado.status === 'respondido' ? 'status-respondido' : 'status-pendente'}`}></span>
+                                                        {chamado.status === 'respondido' ? 'Respondido' : 'Pendente'}
+                                                    </span>
+                                                </div>
+
+                                                <div className="small text-muted mb-2">
+                                                    Destinatário: <strong>{chamado.destinatario}</strong> • {chamado.data}
+                                                </div>
+
+                                                <p className="small bg-light p-2 rounded border mb-3">
+                                                    "{chamado.mensagem}"
+                                                </p>
+                                            </div>
+
+                                            {chamado.status === 'respondido' ? (
+                                                <div className="p-2 rounded bg-success bg-opacity-10 border border-success small">
+                                                    <strong>Parecer enviado:</strong> {chamado.resposta}
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control form-control-sm mb-2"
+                                                        placeholder="Escreva a resposta institucional..."
+                                                        value={respostasDigitadas[chamado.id] || ''}
+                                                        onChange={(e) => this.setState({
+                                                            respostasDigitadas: {
+                                                                ...respostasDigitadas,
+                                                                [chamado.id]: e.target.value
+                                                            }
+                                                        })}
+                                                    />
+                                                    <button
+                                                        className="btn-unisinos btn-sm w-100"
+                                                        onClick={() => this.handleResponder(chamado.id, responderChamado)}
+                                                    >
+                                                        <i className="bi bi-check2-circle me-1"></i> Responder e Concluir
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }}
+            </PortalContext.Consumer>
+        );
+    }
+}
+
 class App extends React.Component {
     constructor(props) {
         super(props);
@@ -313,79 +1003,24 @@ class App extends React.Component {
                 { id: 102, nome: 'Arquitetura de Computadores', cargaHoraria: 60 },
                 { id: 103, nome: 'Banco de Dados I', cargaHoraria: 60 }
             ],
-            turmas: [
-                {
-                    id: 1,
-                    disciplina: 'Desenvolvimento Front-End',
-                    area: 'Programação',
-                    professor: 'Prof. Ricardo Alves',
-                    horarioCodigo: '24',
-                    horarioTexto: 'Segunda - Noite',
-                    cargaHoraria: 60,
-                    alunosMatriculados: ['202610849']
-                },
-                {
-                    id: 2,
-                    disciplina: 'Matemática Financeira',
-                    area: 'Gestão e Negócios',
-                    professor: 'Profa. Mariana Costa',
-                    horarioCodigo: '44',
-                    horarioTexto: 'Quarta - Noite',
-                    cargaHoraria: 60,
-                    alunosMatriculados: ['202610849']
-                },
-                {
-                    id: 3,
-                    disciplina: 'Engenharia de Software Ágil',
-                    area: 'Programação',
-                    professor: 'Prof. Ricardo Alves',
-                    horarioCodigo: '34',
-                    horarioTexto: 'Terça - Noite',
-                    cargaHoraria: 60,
-                    alunosMatriculados: []
-                },
-                {
-                    id: 4,
-                    disciplina: 'Governança de TI',
-                    area: 'Gestão e Negócios',
-                    professor: 'Prof. Carlos Mendes',
-                    horarioCodigo: '54',
-                    horarioTexto: 'Quinta - Noite',
-                    cargaHoraria: 60,
-                    alunosMatriculados: []
-                },
-                {
-                    id: 5,
-                    disciplina: 'Estrutura de Dados Avançada',
-                    area: 'Programação',
-                    professor: 'Prof. Lucas Ferreira',
-                    horarioCodigo: '21',
-                    horarioTexto: 'Segunda - Manhã',
-                    cargaHoraria: 60,
-                    alunosMatriculados: []
-                }
-            ],
-            chamados: [
-                {
-                    id: 1,
-                    assunto: 'Dúvida de Matrícula',
-                    destinatario: 'Prof. Ricardo Alves',
-                    mensagem: 'Professor, a disciplina exige conhecimento prévio de Node.js?',
-                    resposta: 'Olá Gabriel! Não precisa, veremos o básico de Node e Express na semana 5.',
-                    status: 'respondido',
-                    data: '12/11/2026'
-                },
-                {
-                    id: 2,
-                    assunto: 'Quebra de Pré-requisito',
-                    destinatario: 'Prof. Lucas Ferreira',
-                    mensagem: 'Gostaria de solicitar quebra de pré-requisito para Estrutura de Dados.',
-                    resposta: '',
-                    status: 'pendente',
-                    data: '14/11/2026'
-                }
-            ]
+            turmas: [],
+            chamados: []
         };
+    }
+
+    componentDidMount() {
+        const API_URL = 'http://localhost:3001';
+
+        Promise.all([
+            fetch(`${API_URL}/turmas`).then(res => res.json()),
+            fetch(`${API_URL}/chamados`).then(res => res.json())
+        ])
+        .then(([turmasApi, chamadosApi]) => {
+            this.setState({ turmas: turmasApi, chamados: chamadosApi });
+        })
+        .catch((erro) => {
+            console.error('Erro ao conectar com o back-end:', erro);
+        });
     }
 
     navegarPara = (novaTela) => {
@@ -410,12 +1045,76 @@ class App extends React.Component {
         this.setState({ usuario: null, telaAtual: 'login' });
     }
 
+    alternarMatricula = (turmaId) => {
+        const matriculaAtual = this.state.usuario.matricula;
+
+        fetch(`http://localhost:3001/turmas/${turmaId}/matricular`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matricula: matriculaAtual })
+        })
+        .then(res => res.json())
+        .then(turmasAtualizadas => {
+            this.setState({ turmas: turmasAtualizadas });
+        });
+    }
+
+    adicionarChamado = (novoChamado) => {
+        fetch('http://localhost:3001/chamados', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novoChamado)
+        })
+        .then(res => res.json())
+        .then(chamadoCriado => {
+            this.setState({ chamados: [chamadoCriado, ...this.state.chamados] });
+        });
+    }
+
+    adicionarTurma = (novaTurma) => {
+        fetch('http://localhost:3001/turmas', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(novaTurma)
+        })
+        .then(res => res.json())
+        .then(turmaCriada => {
+            this.setState({ turmas: [...this.state.turmas, turmaCriada] });
+        });
+    }
+
+    removerTurma = (turmaId) => {
+        fetch(`http://localhost:3001/turmas/${turmaId}`, {
+            method: 'DELETE'
+        })
+        .then(() => {
+            this.setState({ turmas: this.state.turmas.filter(t => t.id !== turmaId) });
+        });
+    }
+
+    responderChamado = (chamadoId, textoResposta) => {
+        fetch(`http://localhost:3001/chamados/${chamadoId}/responder`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ resposta: textoResposta })
+        })
+        .then(res => res.json())
+        .then(chamadosAtualizados => {
+            this.setState({ chamados: chamadosAtualizados });
+        });
+    }
+
     render() {
         const { telaAtual, usuario } = this.state;
 
         const valorContexto = {
             ...this.state,
-            navegarPara: this.navegarPara
+            navegarPara: this.navegarPara,
+            alternarMatricula: this.alternarMatricula,
+            adicionarChamado: this.adicionarChamado,
+            adicionarTurma: this.adicionarTurma,
+            removerTurma: this.removerTurma,
+            responderChamado: this.responderChamado,
         };
 
         return (
@@ -431,22 +1130,10 @@ class App extends React.Component {
                     {telaAtual === 'login' && <TelaLogin onLogin={this.fazerLogin} />}
                     {telaAtual === 'sobre' && <TelaSobre onNavegar={this.navegarPara} />}
                     {telaAtual === 'homeAluno' && <HomeAluno />}
-
-                    {telaAtual === 'matriculasAluno' && (
-                        <div className="container my-4">
-                            <button className="btn-unisinos-outline mb-3" onClick={() => this.navegarPara('homeAluno')}>← Voltar</button>
-                            <h4>Tela de Matrículas (Próximo passo!)</h4>
-                        </div>
-                    )}
-                    {telaAtual === 'atendimentoAluno' && (
-                        <div className="container my-4">
-                            <button className="btn-unisinos-outline mb-3" onClick={() => this.navegarPara('homeAluno')}>← Voltar</button>
-                            <h4>Tela de Atendimento (Em seguida!)</h4>
-                        </div>
-                    )}
-                    {telaAtual === 'homeInstitucional' && (
-                        <div className="container my-4"><h4>Painel Institucional, {usuario.nome}!</h4></div>
-                    )}
+                    {telaAtual === 'matriculasAluno' && <TelaMatriculasAluno />}
+                    {telaAtual === 'atendimentoAluno' && <TelaAtendimentoAluno />}
+                    {telaAtual === 'homeInstitucional' && <HomeInstitucional />}
+                    {telaAtual === 'ofertasInstitucional' && <TelaOfertasTurmas />}
                 </div>
             </PortalContext.Provider>
         );
