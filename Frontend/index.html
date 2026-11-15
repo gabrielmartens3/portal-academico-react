@@ -163,7 +163,7 @@ class TelaLogin extends React.Component {
                         </div>
 
                         <div className="mt-3 p-2 bg-white border rounded text-center small text-muted">
-                            Aluno: <strong>Gabriel Martens S.</strong> / Matrícula: <strong>202610849</strong>
+                            Aluno: <strong>Gabriel Martens da Silva</strong> / RA: <strong>1252024201779</strong>
                         </div>
                     </div>
                 </div>
@@ -194,7 +194,7 @@ class TelaLogin extends React.Component {
                                 <div className="px-3 py-2 bg-white border rounded-pill shadow-sm">
                                     <i className="bi bi-person-circle me-2" style={{ color: '#214099' }}></i>
                                     <strong>{usuario.nome}</strong>
-                                    <span className="text-muted ms-2">| Matrícula: {usuario.matricula}</span>
+                                    <span className="text-muted ms-2">| RA: {usuario.matricula}</span>
                                 </div>
 
                                 <button 
@@ -1030,7 +1030,7 @@ class App extends React.Component {
     fazerLogin = (tipoPerfil) => {
         if (tipoPerfil === 'aluno') {
             this.setState({
-                usuario: { tipo: 'aluno', nome: 'Gabriel Martens da Silva', matricula: '202610849' },
+                usuario: { tipo: 'aluno', nome: 'Gabriel Martens da Silva', matricula: '1252024201779' },
                 telaAtual: 'homeAluno'
             });
         } else {
@@ -1130,10 +1130,11 @@ class App extends React.Component {
                     {telaAtual === 'login' && <TelaLogin onLogin={this.fazerLogin} />}
                     {telaAtual === 'sobre' && <TelaSobre onNavegar={this.navegarPara} />}
                     {telaAtual === 'homeAluno' && <HomeAluno />}
-                    {telaAtual === 'matriculasAluno' && <TelaMatriculasAluno />}
+                    {telaAtual === 'matriculasAluno' && <TelaMatriculas matriculaAluno={usuario.matricula} />}
                     {telaAtual === 'atendimentoAluno' && <TelaAtendimentoAluno />}
                     {telaAtual === 'homeInstitucional' && <HomeInstitucional />}
                     {telaAtual === 'ofertasInstitucional' && <TelaOfertasTurmas />}
+                    {telaAtual === 'chamadosInstitucional' && <TelaChamadosProf />}
                 </div>
             </PortalContext.Provider>
         );

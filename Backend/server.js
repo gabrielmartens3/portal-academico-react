@@ -7,7 +7,7 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
-// Dados iniciais em memória (espelhando o estado inicial do portal)
+// Dados iniciais
 let turmas = [
     {
         id: 1,
@@ -17,7 +17,7 @@ let turmas = [
         horarioCodigo: '24',
         horarioTexto: 'Segunda - Noite',
         cargaHoraria: 60,
-        alunosMatriculados: ['202610849']
+        alunosMatriculados: ['1252024201779']
     },
     {
         id: 2,
@@ -27,7 +27,7 @@ let turmas = [
         horarioCodigo: '44',
         horarioTexto: 'Quarta - Noite',
         cargaHoraria: 60,
-        alunosMatriculados: ['202610849']
+        alunosMatriculados: ['1252024201779']
     },
     {
         id: 3,
@@ -82,7 +82,7 @@ let chamados = [
     }
 ];
 
-// --- ROTAS DE TURMAS ---
+// ROTAS DE TURMAS
 app.get('/turmas', (req, res) => {
     res.json(turmas);
 });
@@ -124,7 +124,7 @@ app.post('/turmas/:id/matricular', (req, res) => {
     res.json(turmas);
 });
 
-// --- ROTAS DE CHAMADOS ---
+// ROTAS DE CHAMADOS
 app.get('/chamados', (req, res) => {
     res.json(chamados);
 });
